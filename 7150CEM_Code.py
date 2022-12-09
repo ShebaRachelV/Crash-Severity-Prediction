@@ -144,7 +144,17 @@ crash.shape
 #irrelevant
 crash = crash.drop(columns=['NameOfIntersectingRoadway','RouteClass',\
                             'RouteClassDesc','DriverPedestrian','LawEnforcementAgencyName'])
-    
+ 
+ctabres=pd.crosstab(index=crash['LightConditionDesc'],columns=crash['LightCondition'])
+print(ctabres)
+ 
+# importing the required function
+from scipy.stats import chi2_contingency
+ 
+# Performing Chi-sq test
+ChiSqResult = chi2_contingency(ctabres)
+ 
+print('The P-Value of the ChiSq Test is:', ChiSqResult[1])
 #Unnecessary columns
 crash = crash.drop(columns=['CrashID','CrashDate','X','Y','NameOfRoadway','DayofWeekNumeric',\
                             'CrashSpecificLocation','CrashSeverity','WeatherCondition1',\
@@ -183,16 +193,7 @@ crash['CrashTownName'] = crash['CrashTownName'].replace \
                         'West Haven','Deep River']
          )
  
-ctabres=pd.crosstab(index=crash['LightConditionDesc'],columns=crash['LightCondition'])
-print(ctabres)
- 
-# importing the required function
-from scipy.stats import chi2_contingency
- 
-# Performing Chi-sq test
-ChiSqResult = chi2_contingency(ctabres)
- 
-print('The P-Value of the ChiSq Test is:', ChiSqResult[1])
+
 
 crash.drop(crash[(crash['MostSevereInjuryDesc'] == 'No Apparent Injury (O)') &\
                  ((crash['MannerCollisionImpactDesc'] == 'Unknown')|\
@@ -222,20 +223,6 @@ print(class_count_1)
 print(class_count_2)
 print(class_count_3)
 print(class_count_4)
-
-ctabres=pd.crosstab(index=crash['LightConditionDesc'],columns=crash['LightCondition'])
-print(ctabres)
- 
-# importing the required function
-from scipy.stats import chi2_contingency
- 
-# Performing Chi-sq test
-ChiSqResult = chi2_contingency(ctabres)
- 
-# P-Value is the Probability of H0 being True
-# If P-Value&gt;0.05 then only we Accept the assumption(H0)
- 
-print('The P-Value of the ChiSq Test is:', ChiSqResult[1])
 
 crash.shape
 crash.to_csv('accidentrecord.csv')
@@ -306,9 +293,9 @@ features_df_new = X1.iloc[:,cols]
 
 new_data.scores_
 
-p_values = pd.Series(chi_scores[0],index = X1.columns)
-p_values.sort_values(ascending = False , inplace = True)
-p_values.plot.bar()
+chi_values = pd.Series(chi_scores[0],index = X1.columns)
+chi_values.sort_values(ascending = False , inplace = True)
+chi_values.plot.bar()
 
 print(crash.isnull().sum())
 
@@ -353,7 +340,6 @@ print(crash.isnull().sum())
 
 from sklearn.model_selection import train_test_split
 
-
 X = crash.drop(columns = ['CrashSeverityDesc_Cat'])
 y = crash['CrashSeverityDesc_Cat']
 
@@ -366,17 +352,13 @@ dataset =pd.DataFrame(scaled_data,columns=X.columns)
 X_train, X_test, y_train, y_test = train_test_split(
              dataset, y, test_size = 0.25,random_state=0)
 
-
-
 from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.metrics import classification_report_imbalanced
 from xgboost import XGBClassifier
-from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import GaussianNB
-from catboost import CatBoostClassifier
+
 
 from collections import Counter
 counter1 = Counter(y_train)
